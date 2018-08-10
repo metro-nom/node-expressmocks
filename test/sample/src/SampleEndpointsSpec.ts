@@ -15,7 +15,7 @@ describe('SampleEndpoints', () => {
         })
 
         it('should fail via next() on validation error', () => {
-            return ExpressMocks.create({ params: { } }).test(helloWorld)
+            return ExpressMocks.create().test(helloWorld)
                 .expectNext(Error, 'validation failed')
         })
     })
