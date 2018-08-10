@@ -3,6 +3,7 @@ import * as HttpStatus from 'http-status-codes'
 import { expect } from 'chai'
 import { default as ExpressMocks, Mocks } from './ExpressMocks'
 import * as VError from 'verror'
+import * as sinon from 'sinon'
 
 const serviceMethod = (value: string) => Promise.resolve({ test: value === 'ok' })
 
@@ -94,7 +95,7 @@ describe('ExpressMocks', () => {
     it('should act like a promise to allow arbritrary tests', () => {
         return mocks.test(asyncServiceRouter)
             .then(() => {
-                expect(mocks.res.json).to.have.been.called
+                sinon.assert.called(mocks.res.json)
             })
     })
 
@@ -120,7 +121,7 @@ describe('ExpressMocks', () => {
             .expectStatus(HttpStatus.NOT_FOUND)
             .expectSend('Not found')
             .then(() => {
-                expect(mocks.res.json).to.not.have.been.called
+                sinon.assert.notCalled(mocks.res.json)
             })
     })
 
@@ -187,8 +188,8 @@ describe('ExpressMocks', () => {
             return Promise.resolve()
         })
 
-        expect(mocks.res.status).to.have.been.calledWith(HttpStatus.NOT_FOUND)
-        expect(mocks.res.send).to.have.been.calledWith('Not found')
-        expect(mocks.res.json).to.not.have.been.called
+        sinon.assert.calledWith(mocks.res.status, HttpStatus.NOT_FOUND)
+        sinon.assert.calledWith(mocks.res.send, 'Not found')
+        sinon.assert.notCalled(mocks.res.json)
     })
 })

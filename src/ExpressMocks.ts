@@ -32,30 +32,30 @@ export class Mocks {
     private createTestResult<T>(promise: Promise<T>): TestResult {
         return Object.assign(promise, {
             expectJson: (expectedJson: any): TestResult => this.createTestResult(promise.then(mocks => {
-                expect(this.res.json).to.have.been.calledWith(expectedJson)
+                sinon.assert.calledWith(this.res.json, expectedJson)
                 return mocks
             })),
             expectSend: (...args: any[]): TestResult => this.createTestResult(promise.then(mocks => {
-                expect(this.res.send).to.have.been.calledWithExactly(...args)
+                sinon.assert.calledWithExactly(this.res.send, ...args)
                 return mocks
             })),
             expectRedirect: (...args: any[]): TestResult => this.createTestResult(promise.then(mocks => {
-                expect(this.res.redirect).to.have.been.calledWithExactly(...args)
+                sinon.assert.calledWithExactly(this.res.redirect, ...args)
                 return mocks
             })),
             expectStatus: (expectedStatus: number): TestResult => this.createTestResult(promise.then(mocks => {
-                expect(this.res.status).to.have.been.calledWith(expectedStatus)
+                sinon.assert.calledWith(this.res.status, expectedStatus)
                 return mocks
             })),
             expectSendStatus: (expectedStatus: number): TestResult => this.createTestResult(promise.then(mocks => {
-                expect(this.res.sendStatus).to.have.been.calledWith(expectedStatus)
+                sinon.assert.calledWith(this.res.sendStatus, expectedStatus)
                 return mocks
             })),
             expectNext: (expected?: any, messageOrCheck?: string | RegExp | ErrorCheck): TestResult => this.createTestResult(promise.then(mocks => {
                 if (!expected) {
-                    expect(this.next).to.have.been.calledWithExactly()
+                    sinon.assert.calledWithExactly(this.next)
                 } else if (expected) {
-                    expect(this.next).to.have.been.calledWithMatch(sinon.match.any)
+                    sinon.assert.calledWithMatch(this.next, sinon.match.any)
 
                     const arg = this.next.firstCall.args[0]
                     if (expected instanceof Error) {
@@ -76,11 +76,11 @@ export class Mocks {
             })),
             expectHeader: (name: string, value: string): TestResult => this.createTestResult(promise.then(mocks => {
                 try {
-                    expect(this.res.set).to.have.been.calledWithExactly(name, value)
+                    sinon.assert.calledWithExactly(this.res.set, name, value)
                     return mocks
                 } catch (e) {
                     try {
-                        expect(this.res.setHeader).to.have.been.calledWithExactly(name, value)
+                        sinon.assert.calledWithExactly(this.res.setHeader, name, value)
                         return mocks
                     } catch (e2) {
                         e.message += `\n${e2.message}`
