@@ -5,10 +5,10 @@ import { default as ExpressMocks, Mocks } from './ExpressMocks'
 import * as VError from 'verror'
 import * as sinon from 'sinon'
 
-const serviceMethod = (value: string) => Promise.resolve({ test: value === 'ok' })
+const serviceMethod = (value: string) => new Promise((resolve) => setTimeout(() => resolve({ test: value === 'ok' }), 1))
 
-const asyncServiceRouter = (req: Request, res: Response, next: NextFunction): Promise<any> => {
-    return serviceMethod(req.query.value).then(res.json).catch(next)
+const asyncServiceRouter = (req: Request, res: Response, next: NextFunction): void => {
+    serviceMethod(req.query.value).then(res.json).catch(next)
 }
 
 class SomeError extends VError {
@@ -32,8 +32,7 @@ describe('ExpressMocks', () => {
             expect(res).to.equal(mocks.res)
             expect(next).to.equal(mocks.next)
 
-            // we always expect that a Promise is returned
-            return Promise.resolve()
+            next()
         }).then(() => {
             expect(called).to.be.true
         })
@@ -51,8 +50,7 @@ describe('ExpressMocks', () => {
             expect(res).to.equal(mocks.res)
             expect(next).to.equal(mocks.next)
 
-            // we always expect that a Promise is returned
-            return Promise.resolve()
+            next()
         }, error).then(() => {
             expect(called).to.be.true
         })
@@ -88,8 +86,22 @@ describe('ExpressMocks', () => {
     it('should allow checking for status changes', () => {
         return mocks.test((_, res) => {
             res.sendStatus(HttpStatus.NOT_FOUND)
-            return Promise.resolve()
         }).expectSendStatus(HttpStatus.NOT_FOUND)
+    })
+
+    it('should allow for request handler which returns a promise to allow post-response action checks', () => {
+        let flag = false
+        return mocks.test((_, res) => {
+            return new Promise(resolve => {
+                res.sendStatus(HttpStatus.NOT_FOUND)
+                setTimeout(()  => {
+                    flag = true
+                    resolve()
+                } , 10)
+            })
+        }).then(() => {
+            expect(flag).to.be.true
+        })
     })
 
     it('should act like a promise to allow arbritrary tests', () => {

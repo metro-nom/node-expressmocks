@@ -10,23 +10,51 @@ export class Mocks {
         responseOptions = {},
         public req = ExpressMocks.mockRequest(requestOptions),
         public res = ExpressMocks.mockResponse(responseOptions),
-        public next = sinon.spy()) {
+        public next = sinon.stub()) {
     }
 
     public test(router: RequestHandler): TestResult {
-        const maybePromise = router(this.req, this.res, this.next as any)
-        if (maybePromise && maybePromise.then) {
-            return this.createTestResult(maybePromise.then(() => this))
-        }
-        return this.createTestResult(Promise.resolve(this))
+        return this.execute(router)
     }
 
     public testError(router: ErrorRequestHandler, err: any): TestResult {
-        const maybePromise = router(err, this.req, this.res, this.next as any)
-        if (maybePromise && maybePromise.then) {
-            return this.createTestResult(maybePromise.then(() => this))
-        }
-        return this.createTestResult(Promise.resolve(this))
+        return this.execute((req, res, next) => {
+            return router(err, req, res, next)
+        })
+    }
+
+    private execute(callback: (req: any, res: any, next: any) => any) {
+        const promise = new Promise((resolve, reject) => {
+            let returnedPromise: any
+            let didReturnPromise: boolean
+            let asynchronous = false
+            let finishedSynchronously = false
+
+            const resolveOnCallback = () => {
+                if (!asynchronous) {
+                    finishedSynchronously = true
+                } else if (!didReturnPromise) {
+                    resolve(this)
+                }
+            }
+            this.res.redirect.callsFake(resolveOnCallback)
+            this.res.sendStatus.callsFake(resolveOnCallback)
+            this.res.json.callsFake(resolveOnCallback)
+            this.res.send.callsFake(resolveOnCallback)
+            this.res.end.callsFake(resolveOnCallback)
+            this.next.callsFake(resolveOnCallback)
+
+            returnedPromise = callback(this.req, this.res, this.next as any)
+            didReturnPromise = !!returnedPromise && returnedPromise.then
+            asynchronous = true
+
+            if (didReturnPromise) {
+                returnedPromise.then(() => resolve(this), reject)
+            } else if (finishedSynchronously) {
+                resolve(this)
+            }
+        })
+        return this.createTestResult(promise)
     }
 
     private createTestResult<T>(promise: Promise<T>): TestResult {
