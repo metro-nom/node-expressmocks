@@ -54,10 +54,10 @@ export class Mocks {
                 resolve(this)
             }
         })
-        return this.createTestResult(promise)
+        return this.createTestResult(promise.then(() => this))
     }
 
-    private createTestResult<T>(promise: Promise<T>): TestResult {
+    private createTestResult<T>(promise: Promise<Mocks>): TestResult {
         return Object.assign(promise, {
             expectJson: (expectedJson: any): TestResult => this.createTestResult(promise.then(mocks => {
                 sinon.assert.calledWith(this.res.json, expectedJson)
@@ -125,7 +125,7 @@ export class Mocks {
     }
 }
 
-export interface TestResult extends Promise<any> {
+export interface TestResult extends Promise<Mocks> {
     expectJson(expectedJson: any): TestResult
     expectSend(...args: any[]): TestResult
     expectRedirect(...args: any[]): TestResult
