@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
 import * as HttpStatus from 'http-status-codes'
 import { expect } from 'chai'
-import { default as ExpressMocks, Mocks } from './ExpressMocks'
+import { default as ExpressMocks, Mocks, TestResult } from './ExpressMocks'
 import * as VError from 'verror'
 import * as sinon from 'sinon'
+import data_driven = require('data-driven')
 
 const serviceMethod = (value: string) => new Promise((resolve) => setTimeout(() => resolve({ test: value === 'ok' }), 1))
 
@@ -191,6 +192,35 @@ describe('ExpressMocks', () => {
                     next(new SomeError('Bla'))
                 })
                 .expectNext(SomeError, 'Blubb').should.be.rejected
+        })
+    })
+
+    data_driven([
+        {
+            scenario: 'next() twice',
+            first: (_1: Request, _2: Response, next: NextFunction) => next(),
+            then: (_1: Request, _2: Response, next: NextFunction) => next(),
+            test: (result: TestResult) => result.expectNext().should.be.rejectedWith('next() called more than once')
+        },
+        {
+            scenario: 'next() then redirect()',
+            first: (_1: Request, _2: Response, next: NextFunction) => next(),
+            then: (_1: Request, res: Response) => res.redirect('/bla'),
+            test: (result: TestResult) => result.expectNext().should.be.rejectedWith('both redirect() and next() were called')
+        },
+        {
+            scenario: 'render() then sendFile()',
+            first: (_1: Request, res: Response) => res.render('myview'),
+            then: (_1: Request, res: Response) => res.sendFile('/bla/file.txt'),
+            test: (result: TestResult) => result.expectRender('myview').should.be.rejectedWith('both sendFile() and render() were called')
+        }
+    ], () => {
+        it('should fail on promise middleware that calls {scenario}', (ctx: any) => {
+            const promise = mocks.test(async (req, res, next) => {
+                ctx.first(req, res, next)
+                ctx.then(req, res, next)
+            })
+            return ctx.test(promise)
         })
     })
 

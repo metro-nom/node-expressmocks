@@ -4,6 +4,8 @@ import { ErrorRequestHandler, RequestHandler } from 'express'
 
 export type ErrorCheck = (err: any) => void
 
+type FinalizingMethod = 'send' | 'json' | 'jsonp' | 'end' | 'sendStatus' | 'sendFile' | 'render' | 'redirect' | 'next'
+
 export class Mocks {
     constructor(
         requestOptions = {},
@@ -58,17 +60,58 @@ export class Mocks {
     }
 
     private createTestResult<T>(promise: Promise<Mocks>): TestResult {
+        const checkForResponse = (expectedMethodName: FinalizingMethod, actualMethodName: FinalizingMethod, actualStub: sinon.SinonStub) => {
+            if (expectedMethodName === actualMethodName) {
+                expect(actualStub.callCount, `${expectedMethodName}() called more than once`).to.equal(1)
+            } else {
+                expect(actualStub.callCount, `both ${actualMethodName}() and ${expectedMethodName}() were called`).to.equal(0)
+            }
+        }
+        const checkForOtherResponses = (expectedCall: FinalizingMethod) => {
+            checkForResponse(expectedCall, 'redirect', this.res.redirect)
+            checkForResponse(expectedCall, 'send', this.res.send)
+            checkForResponse(expectedCall, 'sendStatus', this.res.sendStatus)
+            checkForResponse(expectedCall, 'sendFile', this.res.sendFile)
+            checkForResponse(expectedCall, 'render', this.res.render)
+            checkForResponse(expectedCall, 'end', this.res.end)
+            checkForResponse(expectedCall, 'json', this.res.json)
+            checkForResponse(expectedCall, 'jsonp', this.res.jsonp)
+            checkForResponse(expectedCall, 'next', this.next)
+        }
         return Object.assign(promise, {
             expectJson: (expectedJson: any): TestResult => this.createTestResult(promise.then(mocks => {
+                checkForOtherResponses('json')
                 sinon.assert.calledWith(this.res.json, expectedJson)
                 return mocks
             })),
+            expectJsonp: (expectedJson: any): TestResult => this.createTestResult(promise.then(mocks => {
+                checkForOtherResponses('jsonp')
+                sinon.assert.calledWith(this.res.jsonp, expectedJson)
+                return mocks
+            })),
             expectSend: (...args: any[]): TestResult => this.createTestResult(promise.then(mocks => {
+                checkForOtherResponses('send')
                 sinon.assert.calledWithExactly(this.res.send, ...args)
                 return mocks
             })),
+            expectEnd: (...args: any[]): TestResult => this.createTestResult(promise.then(mocks => {
+                checkForOtherResponses('end')
+                sinon.assert.calledWithExactly(this.res.send, ...args)
+                return mocks
+            })),
+            expectSendFile: (...args: any[]): TestResult => this.createTestResult(promise.then(mocks => {
+                checkForOtherResponses('sendFile')
+                sinon.assert.calledWithExactly(this.res.sendFile, ...args)
+                return mocks
+            })),
             expectRedirect: (...args: any[]): TestResult => this.createTestResult(promise.then(mocks => {
+                checkForOtherResponses('redirect')
                 sinon.assert.calledWithExactly(this.res.redirect, ...args)
+                return mocks
+            })),
+            expectRender: (...args: any[]): TestResult => this.createTestResult(promise.then(mocks => {
+                checkForOtherResponses('render')
+                sinon.assert.calledWithExactly(this.res.re, ...args)
                 return mocks
             })),
             expectStatus: (expectedStatus: number): TestResult => this.createTestResult(promise.then(mocks => {
@@ -76,10 +119,12 @@ export class Mocks {
                 return mocks
             })),
             expectSendStatus: (expectedStatus: number): TestResult => this.createTestResult(promise.then(mocks => {
+                checkForOtherResponses('sendStatus')
                 sinon.assert.calledWith(this.res.sendStatus, expectedStatus)
                 return mocks
             })),
             expectNext: (expected?: any, messageOrCheck?: string | RegExp | ErrorCheck): TestResult => this.createTestResult(promise.then(mocks => {
+                checkForOtherResponses('next')
                 if (!expected) {
                     sinon.assert.calledWithExactly(this.next)
                 } else if (expected) {
@@ -127,9 +172,13 @@ export class Mocks {
 
 export interface TestResult extends Promise<Mocks> {
     expectJson(expectedJson: any): TestResult
+    expectJsonp(expectedJson: any): TestResult
     expectSend(...args: any[]): TestResult
+    expectEnd(...args: any[]): TestResult
+    expectRender(...args: any[]): TestResult
     expectRedirect(...args: any[]): TestResult
     expectSendStatus(expectedStatus: number): TestResult
+    expectSendFile(...args: any[]): TestResult
     expectStatus(expectedStatus: number): TestResult
     expectNext(expected?: any, message?: string | RegExp | ErrorCheck): TestResult
     expectHeader(name: string, value: string): TestResult
