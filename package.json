@@ -10,8 +10,9 @@
     "scripts": {
         "build": "npm run compile && npm run lint && npm run test",
         "compile": "tsc",
+        "test": "npm run lint && npm run test:unit && npm run test:sample",
         "lint": "tslint 'src/**/*.ts'",
-        "test": "_mocha --opts src/test/mocha.opts 'src/**/*Spec.ts'",
+        "test:unit": "_mocha --opts src/test/mocha.opts 'src/**/*Spec.ts'",
         "test:sample": "cd test/sample && npm install && npm run test"
     },
     "repository": {
