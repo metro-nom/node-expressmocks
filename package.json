@@ -1,6 +1,6 @@
 {
     "name": "expressmocks",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "A small tool to support unit testing of express request handlers",
     "main": "./lib/ExpressMocks.js",
     "types": "./lib/ExpressMocks.d.ts",
