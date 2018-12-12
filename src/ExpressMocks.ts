@@ -42,8 +42,11 @@ export class Mocks {
             this.res.redirect.callsFake(resolveOnCallback)
             this.res.sendStatus.callsFake(resolveOnCallback)
             this.res.json.callsFake(resolveOnCallback)
+            this.res.jsonp.callsFake(resolveOnCallback)
             this.res.send.callsFake(resolveOnCallback)
+            this.res.sendFile.callsFake(resolveOnCallback)
             this.res.end.callsFake(resolveOnCallback)
+            this.res.render.callsFake(resolveOnCallback)
             this.next.callsFake(resolveOnCallback)
 
             returnedPromise = callback(this.req, this.res, this.next as any)
@@ -101,7 +104,7 @@ export class Mocks {
             })),
             expectSendFile: (...args: any[]): TestResult => this.createTestResult(promise.then(mocks => {
                 checkForOtherResponses('sendFile')
-                sinon.assert.calledWithExactly(this.res.sendFile, ...args)
+                sinon.assert.calledWith(this.res.sendFile, ...args)
                 return mocks
             })),
             expectRedirect: (...args: any[]): TestResult => this.createTestResult(promise.then(mocks => {
@@ -111,7 +114,7 @@ export class Mocks {
             })),
             expectRender: (...args: any[]): TestResult => this.createTestResult(promise.then(mocks => {
                 checkForOtherResponses('render')
-                sinon.assert.calledWithExactly(this.res.re, ...args)
+                sinon.assert.calledWith(this.res.render, ...args)
                 return mocks
             })),
             expectStatus: (expectedStatus: number): TestResult => this.createTestResult(promise.then(mocks => {

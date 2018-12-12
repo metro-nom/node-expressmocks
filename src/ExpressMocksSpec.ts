@@ -66,6 +66,24 @@ describe('ExpressMocks', () => {
         return mocks.test(asyncServiceRouter).expectJson({ test: true })
     })
 
+    it('should resolve after sendFile', () => {
+        return mocks.test((_, res) => {
+            res.sendFile('/path/to/file', { root: '..' })
+        }).expectSendFile('/path/to/file')
+    })
+
+    it('should resolve after render', () => {
+        return mocks.test((_, res) => {
+            res.render('myview')
+        }).expectRender('myview')
+    })
+
+    it('should resolve after jsonp', () => {
+        return mocks.test((_, res) => {
+            res.jsonp({ test: true })
+        }).expectJsonp({ test: true })
+    })
+
     it('should pass checking redirect', () => {
         return mocks.test((_, res) => {
             res.redirect('/other/url')
