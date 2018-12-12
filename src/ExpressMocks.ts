@@ -132,12 +132,14 @@ export class Mocks {
             })),
             expectNext: (expected?: any, messageOrCheck?: string | RegExp | ErrorCheck): TestResult => this.createTestResult(promise.then(mocks => {
                 checkForOtherResponses('next')
+                sinon.assert.called(this.next)
+                const args = this.next.firstCall.args
                 if (!expected) {
-                    sinon.assert.calledWithExactly(this.next)
+                    expect(!args || args.length === 0 || !args[0]).to.be.true
                 } else if (expected) {
                     sinon.assert.calledWithMatch(this.next, sinon.match.any)
 
-                    const arg = this.next.firstCall.args[0]
+                    const arg = args[0]
                     if (expected instanceof Error) {
                         expect(arg).to.deep.equal(expected)
                     } else {

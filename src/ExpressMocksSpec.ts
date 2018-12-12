@@ -180,6 +180,13 @@ describe('ExpressMocks', () => {
                 .expectNext()
         })
 
+        it('should accept "next" with explicit undefined', () => {
+            return mocks.test((_1, _2, next) => {
+                    next(undefined)
+                })
+                .expectNext(undefined)
+        })
+
         it('should allow checking for next with error type', () => {
             return mocks.test((_1, _2, next) => {
                     next(new SomeError('Bla'))
