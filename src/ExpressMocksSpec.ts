@@ -164,6 +164,14 @@ describe('ExpressMocks', () => {
             .expectSend()
     })
 
+    it('should allow testing type', () => {
+        return mocks.test((_, res) => {
+                res.type('text/html').send()
+            })
+            .expectType('text/html')
+            .expectSend()
+    })
+
     describe('next', () => {
         it('should allow checking for nextCall', () => {
             return mocks.test((_1, _2, next) => {

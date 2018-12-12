@@ -117,6 +117,10 @@ export class Mocks {
                 sinon.assert.calledWith(this.res.render, ...args)
                 return mocks
             })),
+            expectType: (expectedType: string): TestResult => this.createTestResult(promise.then(mocks => {
+                sinon.assert.calledWith(this.res.type, expectedType)
+                return mocks
+            })),
             expectStatus: (expectedStatus: number): TestResult => this.createTestResult(promise.then(mocks => {
                 sinon.assert.calledWith(this.res.status, expectedStatus)
                 return mocks
@@ -182,6 +186,7 @@ export interface TestResult extends Promise<Mocks> {
     expectRedirect(...args: any[]): TestResult
     expectSendStatus(expectedStatus: number): TestResult
     expectSendFile(...args: any[]): TestResult
+    expectType(expectedType: string): TestResult
     expectStatus(expectedStatus: number): TestResult
     expectNext(expected?: any, message?: string | RegExp | ErrorCheck): TestResult
     expectHeader(name: string, value: string): TestResult
