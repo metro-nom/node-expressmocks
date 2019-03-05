@@ -20,7 +20,7 @@ npm install -D expressmocks
 
 ## Usage examples
 
-Let's say you have the follwing `SampleEndpoints` implementation:
+Let's say you have the following `SampleEndpoints` implementation:
 ```typescript
 import { RequestHandler } from 'express'
 
