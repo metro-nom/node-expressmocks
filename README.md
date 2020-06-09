@@ -51,7 +51,8 @@ describe('helloWorld', () => {
 
     it('should return with 404 for others', () => {
         return ExpressMocks.create({ params: { name: 'Simon' } }).test(helloWorld)
-            .expectStatus(404).expectSend()
+            .expectStatus(404)
+            .expectSend()
     })
 
     it('should fail via next() on validation error', () => {
@@ -61,9 +62,26 @@ describe('helloWorld', () => {
 })
 ```
 
-`ExpressMocks` creates stubs for the `request`, `response` and `next` parameters and provides a simple API to test agains the most often used method calls.
+`ExpressMocks` creates stubs for the `request`, `response` and `next` parameters and provides a simple API to test against the most often used method calls.
 
-The methods of the request and response objects are sinon stubs, which can be checked via regular Sinon API.
+The functions of the request and response objects are [SinonJS stubs](https://sinonjs.org/releases/latest/stubs/), which can be checked via regular Sinon API. 
+You may also add your own custom stubs if you are using some more esoteric functionality:
+
+```typescript
+    it('should allow testing on missing `cork()` method', () => {
+        return ExpressMocks.create({}, { cork: sinon.stub() })
+            .test((req, res, next) => {
+                res.cork()
+                // ...
+            })
+            .expectEnd()
+            .then(({ res }) => {
+                // using chai & sinon-chai
+                expect(res.writeHead).to.have.been.called
+                expect(res.cork).to.have.been.called
+            })
+    })
+```
 
 For more examples, please see the [sample project](./test/sample) and the [ExpressMocksSpec](./src/ExpressMocksSpec.ts)
 

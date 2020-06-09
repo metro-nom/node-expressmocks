@@ -312,6 +312,7 @@ export default class ExpressMocks {
                 status: sinon.stub().returns(ret),
                 type: sinon.stub().returns(ret),
                 vary: sinon.stub().returns(ret),
+                writeHead: sinon.stub().returns(ret),
             },
             options,
         )
