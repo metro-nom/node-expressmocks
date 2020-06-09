@@ -11,8 +11,12 @@
         "build": "npm run compile && npm run lint && npm run test",
         "compile": "tsc",
         "test": "npm run lint && npm run test:unit && npm run test:sample",
-        "lint": "tslint 'src/**/*.ts'",
-        "test:unit": "_mocha --opts src/test/mocha.opts 'src/**/*Spec.ts'",
+        "lint": "eslint 'src/**/*.ts'",
+        "lint:fix": "eslint 'src/**/*.ts' --fix",
+        "coverage": "npm run coverage:run && npm run coverage:check",
+        "coverage:run": "nyc _mocha 'src/**/*Spec.ts'",
+        "coverage:check": "nyc check-coverage  --statements 91 --branches 71 --functions 90  --lines 91",
+        "test:unit": "_mocha 'src/**/*Spec.ts'",
         "test:sample": "cd test/sample && npm install && npm run test"
     },
     "repository": {
@@ -32,9 +36,7 @@
         "url": "https://github.com/metro-nom/node-expressmocks/issues"
     },
     "homepage": "https://github.com/metro-nom/node-expressmocks#readme",
-    "dependencies": {
-        "chai": ">=4.0.0"
-    },
+    "dependencies": {},
     "peerDependencies": {
         "express": "^4.0.0",
         "sinon": ">=6.0.0"
@@ -47,15 +49,22 @@
         "@types/mocha": "^5.2.5",
         "@types/sinon": "^5.0.1",
         "@types/verror": "^1.10.3",
+        "@typescript-eslint/eslint-plugin": "^3.2.0",
+        "@typescript-eslint/parser": "^3.2.0",
+        "chai": ">=4.0.0",
         "chai-as-promised": "^7.1.1",
         "data-driven": "^1.4.0",
+        "eslint": "^7.2.0",
+        "eslint-config-prettier": "^6.11.0",
+        "eslint-plugin-prettier": "^3.1.3",
         "express": "^4.0.0",
         "http-status-codes": "^1.3.0",
         "mocha": "^7.2.0",
+        "nyc": "^15.1.0",
+        "prettier": "^2.0.5",
         "sinon": ">=6.0.0",
         "ts-node": "^7.0.0",
-        "tslint": "^5.11.0",
-        "typescript": "^3.0.1",
+        "typescript": "^3.9.5",
         "verror": "^1.10.0"
     }
 }

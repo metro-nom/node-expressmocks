@@ -1,0 +1,27 @@
+{
+    "check-coverage": true,
+    "watermarks": {
+        "lines": [ 80, 100 ],
+        "functions": [ 80, 100 ],
+        "branches": [ 80, 100 ],
+        "statements": [ 80, 100 ]
+    },
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "**/*.d.ts",
+        "**/*Spec.ts",
+        "src/test/**"
+    ],
+    "reporter": [
+        "text",
+        "html"
+    ],
+    "extension": [
+        ".ts"
+    ],
+    "all": true,
+    "temp-dir": "./build/coverage/temp",
+    "report-dir": "./build/coverage"
+}
