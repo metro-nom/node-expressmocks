@@ -27,7 +27,7 @@ export class Mocks {
         return this.execute(router)
     }
 
-    public testError(router: ErrorRequestHandler, err: any): TestResult {
+    public testError(router: ErrorRequestHandler, err: unknown): TestResult {
         return this.execute((req, res, next) => {
             return router(err, req, res, next)
         })

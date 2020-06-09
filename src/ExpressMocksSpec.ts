@@ -275,7 +275,7 @@ describe('ExpressMocks', () => {
                 .test(async (_1, res, next) => {
                     const origJson = res.json
                     res.json = (body?: any) => {
-                        return origJson.call(res)
+                        return origJson.call(res, body)
                     }
                     next()
                 })
