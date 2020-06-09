@@ -1,9 +1,14 @@
 import * as sinon from 'sinon'
 import { ErrorRequestHandler, RequestHandler } from 'express'
 import * as assert from 'assert'
+import { SinonStub } from 'sinon'
 export type ErrorCheck = (err: any) => void
 
 type FinalizingMethod = 'send' | 'json' | 'jsonp' | 'end' | 'sendStatus' | 'sendFile' | 'render' | 'redirect' | 'next'
+
+function isSinonStub(stub: any): stub is SinonStub {
+    return stub?.hasOwnProperty?.('callCount')
+}
 
 export class Mocks {
     constructor(
@@ -63,10 +68,13 @@ export class Mocks {
 
     private createTestResult<T>(promise: Promise<Mocks>): TestResult {
         const checkForResponse = (expectedMethodName: FinalizingMethod, actualMethodName: FinalizingMethod, actualStub: sinon.SinonStub) => {
-            if (expectedMethodName === actualMethodName) {
-                assert.strictEqual(actualStub.callCount, 1, `${expectedMethodName}() called more than once`)
-            } else {
-                assert.strictEqual(actualStub.callCount, 0, `both ${actualMethodName}() and ${expectedMethodName}() were called`)
+            if (isSinonStub(actualStub)) {
+                if (expectedMethodName === actualMethodName) {
+                    assert.ok(actualStub.callCount <= 1, `${expectedMethodName}() called more than once`)
+                    assert.strictEqual(actualStub.callCount, 1, `${expectedMethodName}() not called as expected`)
+                } else {
+                    assert.strictEqual(actualStub.callCount, 0, `${expectedMethodName}() call was expected, but (also?) ${actualMethodName}() was called`)
+                }
             }
         }
         const checkForOtherResponses = (expectedCall: FinalizingMethod) => {
@@ -262,6 +270,7 @@ export default class ExpressMocks {
                 params: {},
                 query: {},
                 session: {},
+                cookies: [],
             },
             options,
         )

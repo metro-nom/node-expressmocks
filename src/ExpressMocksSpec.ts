@@ -219,6 +219,28 @@ describe('ExpressMocks', () => {
             expect(err.message).to.contain('expected call to next() without arguments, but got "Error: fail"')
         })
 
+        it('should fail when next() has not been called at promise end', async () => {
+            const err = await mocks
+                .test(async (_1, _2, _3) => {
+                    // don't call next()
+                })
+                .expectNext().should.be.rejected
+
+            expect(err.message).to.contain('next() not called as expected')
+        })
+
+        it('should handle replaced stub functions gracefully by ignoring call counts', async () => {
+            return mocks
+                .test(async (_1, res, next) => {
+                    const origJson = res.json
+                    res.json = (body?: any) => {
+                        return origJson.call(res)
+                    }
+                    next()
+                })
+                .expectNext()
+        })
+
         it('should allow checking for next with error type', () => {
             return mocks
                 .test((_1, _2, next) => {
@@ -295,13 +317,14 @@ describe('ExpressMocks', () => {
                 scenario: 'next() then redirect()',
                 first: (_1: Request, _2: Response, next: NextFunction) => next(),
                 then: (_1: Request, res: Response) => res.redirect('/bla'),
-                test: (result: TestResult) => result.expectNext().should.be.rejectedWith('both redirect() and next() were called'),
+                test: (result: TestResult) => result.expectNext().should.be.rejectedWith('next() call was expected, but (also?) redirect() was called'),
             },
             {
                 scenario: 'render() then sendFile()',
                 first: (_1: Request, res: Response) => res.render('myview'),
                 then: (_1: Request, res: Response) => res.sendFile('/bla/file.txt'),
-                test: (result: TestResult) => result.expectRender('myview').should.be.rejectedWith('both sendFile() and render() were called'),
+                test: (result: TestResult) =>
+                    result.expectRender('myview').should.be.rejectedWith('render() call was expected, but (also?) sendFile() was called'),
             },
         ],
         () => {
