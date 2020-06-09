@@ -12,7 +12,8 @@
         "expressmocks": "file:../..",
         "mocha": "^7.2.0",
         "sinon": "^6.1.5",
-        "ts-node": "^7.0.0"
+        "ts-node": "^7.0.0",
+        "typescript": "^3.9.5"
     },
     "dependencies": {
         "express": "^4.16.3"
