@@ -120,7 +120,7 @@ export class Mocks {
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('end')
-                    sinon.assert.calledWithExactly(this.initialResponse.send, ...args)
+                    sinon.assert.calledWithExactly(this.initialResponse.end, ...args)
                     return mocks
                 }),
             )
@@ -171,16 +171,19 @@ export class Mocks {
                 }),
             )
 
-        const validateErrorOfNext = (arg: any, expected: any, messageOrCheck: string | RegExp | ((err: any) => void) | undefined) => {
-            sinon.assert.calledWithMatch(this.next, sinon.match.any)
+        const validateArgumentOfNext = (arg: any, expected: any, messageOrCheck: string | RegExp | ((err: any) => void) | undefined) => {
+            const errorMessage = arg?.message ?? arg?.toString()
 
-            if (expected instanceof Error) {
+            if (arg === undefined) {
+                throw new Error('expected next to have been called with any argument, but was called without')
+            } else if (expected instanceof Error) {
                 assert.strictEqual(arg, expected)
+            } else if (typeof expected === 'string') {
+                assert.strictEqual(errorMessage, expected)
             } else {
                 assert.ok(arg instanceof expected, `expected next to have been called with instance of ${expected.name ?? 'unnamed constructor'}`)
             }
 
-            const errorMessage = arg?.message ?? arg?.toString()
             if (typeof messageOrCheck === 'string') {
                 assert.ok(errorMessage?.indexOf?.(messageOrCheck) !== -1, `expected error message to include "${messageOrCheck}", but got "${errorMessage}"`)
             } else if (messageOrCheck instanceof RegExp) {
@@ -198,8 +201,8 @@ export class Mocks {
                     const args = this.next.firstCall.args
                     if (!expected) {
                         assert.ok(!args || args.length === 0 || !args[0], `expected call to next() without arguments, but got "${args[0]}"`)
-                    } else if (expected) {
-                        validateErrorOfNext(args[0], expected, messageOrCheck)
+                    } else {
+                        validateArgumentOfNext(args[0], expected, messageOrCheck)
                     }
                     return mocks
                 }),
@@ -215,8 +218,7 @@ export class Mocks {
                             sinon.assert.calledWithExactly(this.initialResponse.setHeader, name, value)
                             return mocks
                         } catch (e2) {
-                            e.message += `\n${e2.message}`
-                            throw e
+                            throw new Error(`Expected header '${name}' to have been set to '${value}'`)
                         }
                     }
                 }),

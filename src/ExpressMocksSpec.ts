@@ -59,6 +59,27 @@ describe('ExpressMocks', () => {
             })
     })
 
+    it('should allow modification of request and response', () => {
+        return ExpressMocks.create(
+            {
+                myProp: true,
+            },
+            {
+                done: false,
+            },
+        )
+            .test((req: any, res: any, next) => {
+                try {
+                    expect(req.myProp).to.be.true
+                    expect(res.done).to.be.false
+                    next()
+                } catch (err) {
+                    next(err)
+                }
+            })
+            .expectNext()
+    })
+
     it('should allow checking for json response', () => {
         return mocks.test(asyncServiceRouter).expectJson({ test: false })
     })
@@ -102,6 +123,14 @@ describe('ExpressMocks', () => {
                 res.jsonp({ test: true })
             })
             .expectJsonp({ test: true })
+    })
+
+    it('should resolve after end', () => {
+        return mocks
+            .test((_, res) => {
+                res.end()
+            })
+            .expectEnd()
     })
 
     it('should pass checking redirect', () => {
@@ -262,6 +291,22 @@ describe('ExpressMocks', () => {
                 .expectNext(SomeError, 'Bla')
         })
 
+        it('should allow checking for next with string parameter', () => {
+            return mocks
+                .test((_1, _2, next) => {
+                    next('route')
+                })
+                .expectNext('route')
+        })
+
+        it('should allow checking for next with Error via string parameter', () => {
+            return mocks
+                .test((_1, _2, next) => {
+                    next(new Error('failed'))
+                })
+                .expectNext('failed')
+        })
+
         it('should allow checking for next with error instance', () => {
             const error = new SomeError('Bla')
 
@@ -295,7 +340,17 @@ describe('ExpressMocks', () => {
                 .test((_1, _2, next) => {
                     next(new SomeError('Bla'))
                 })
-                .expectNext(OtherError).should.be.rejected
+                .expectNext(OtherError)
+                .should.be.rejectedWith('expected next to have been called with instance of OtherError')
+        })
+
+        it('should fail on missing parameter', () => {
+            return mocks
+                .test((_1, _2, next) => {
+                    next()
+                })
+                .expectNext(Error)
+                .should.be.rejectedWith('expected next to have been called with any argument, but was called without')
         })
 
         it('should fail on wrong message regexp for next with error', () => {
@@ -350,14 +405,53 @@ describe('ExpressMocks', () => {
         },
     )
 
-    it('should harmonize with async/await (but we can only do "custom" checks)', async () => {
-        await mocks.test((_, res) => {
-            res.status(HttpStatus.NOT_FOUND).send('Not found')
-            return Promise.resolve()
-        })
+    it('should harmonize with async/await', async () => {
+        await mocks
+            .test((_, res) => {
+                res.status(HttpStatus.NOT_FOUND).send('Not found')
+                return Promise.resolve()
+            })
+            .expectSend('Not found')
 
         sinon.assert.calledWith(mocks.res.status, HttpStatus.NOT_FOUND)
-        sinon.assert.calledWith(mocks.res.send, 'Not found')
-        sinon.assert.notCalled(mocks.res.json)
+    })
+
+    it('should finish asynchronously, even without RequestHandler that returns a promise', () => {
+        return mocks
+            .test((_, res) => {
+                setTimeout(() => {
+                    res.send('done')
+                }, 10)
+            })
+            .expectSend('done')
+    })
+
+    describe('header checks', () => {
+        it('should allow checking for a header value via set', () => {
+            return mocks
+                .test((_, res, next) => {
+                    res.set('X-My-Header', 'myValue')
+                    next()
+                })
+                .expectHeader('X-My-Header', 'myValue')
+                .expectNext()
+        })
+        it('should allow checking for a header value via setHeader', () => {
+            return mocks
+                .test((_, res, next) => {
+                    res.setHeader('X-My-Header', 'myValue')
+                    next()
+                })
+                .expectHeader('X-My-Header', 'myValue')
+                .expectNext()
+        })
+        it('should fail if header has not been set', () => {
+            return mocks
+                .test((_, res, next) => {
+                    next()
+                })
+                .expectHeader('X-My-Header', 'myValue')
+                .should.be.rejectedWith("Expected header 'X-My-Header' to have been set to 'myValue'")
+        })
     })
 })

@@ -15,7 +15,7 @@
         "lint:fix": "eslint 'src/**/*.ts' --fix",
         "coverage": "npm run coverage:run && npm run coverage:check",
         "coverage:run": "nyc _mocha 'src/**/*Spec.ts'",
-        "coverage:check": "nyc check-coverage  --statements 91 --branches 71 --functions 90  --lines 91",
+        "coverage:check": "nyc check-coverage  --statements 99 --branches 82 --functions 99  --lines 99",
         "test:unit": "_mocha 'src/**/*Spec.ts'",
         "test:sample": "cd test/sample && npm install && npm run test"
     },
