@@ -11,13 +11,17 @@ function isSinonStub(stub: any): stub is SinonStub {
 }
 
 export class Mocks {
+    private initialResponse: any
+
     constructor(
         requestOptions = {},
         responseOptions = {},
         public req = ExpressMocks.mockRequest(requestOptions),
         public res = ExpressMocks.mockResponse(responseOptions),
         public next = sinon.stub(),
-    ) {}
+    ) {
+        this.initialResponse = { ...res }
+    }
 
     public test(router: RequestHandler): TestResult {
         return this.execute(router)
@@ -78,21 +82,21 @@ export class Mocks {
             }
         }
         const checkForOtherResponses = (expectedCall: FinalizingMethod) => {
-            checkForResponse(expectedCall, 'redirect', this.res.redirect)
-            checkForResponse(expectedCall, 'send', this.res.send)
-            checkForResponse(expectedCall, 'sendStatus', this.res.sendStatus)
-            checkForResponse(expectedCall, 'sendFile', this.res.sendFile)
-            checkForResponse(expectedCall, 'render', this.res.render)
-            checkForResponse(expectedCall, 'end', this.res.end)
-            checkForResponse(expectedCall, 'json', this.res.json)
-            checkForResponse(expectedCall, 'jsonp', this.res.jsonp)
+            checkForResponse(expectedCall, 'redirect', this.initialResponse.redirect)
+            checkForResponse(expectedCall, 'send', this.initialResponse.send)
+            checkForResponse(expectedCall, 'sendStatus', this.initialResponse.sendStatus)
+            checkForResponse(expectedCall, 'sendFile', this.initialResponse.sendFile)
+            checkForResponse(expectedCall, 'render', this.initialResponse.render)
+            checkForResponse(expectedCall, 'end', this.initialResponse.end)
+            checkForResponse(expectedCall, 'json', this.initialResponse.json)
+            checkForResponse(expectedCall, 'jsonp', this.initialResponse.jsonp)
             checkForResponse(expectedCall, 'next', this.next)
         }
         const expectJson = (expectedJson: any): TestResult =>
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('json')
-                    sinon.assert.calledWith(this.res.json, expectedJson)
+                    sinon.assert.calledWith(this.initialResponse.json, expectedJson)
                     return mocks
                 }),
             )
@@ -100,7 +104,7 @@ export class Mocks {
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('jsonp')
-                    sinon.assert.calledWith(this.res.jsonp, expectedJson)
+                    sinon.assert.calledWith(this.initialResponse.jsonp, expectedJson)
                     return mocks
                 }),
             )
@@ -108,7 +112,7 @@ export class Mocks {
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('send')
-                    sinon.assert.calledWithExactly(this.res.send, ...args)
+                    sinon.assert.calledWithExactly(this.initialResponse.send, ...args)
                     return mocks
                 }),
             )
@@ -116,7 +120,7 @@ export class Mocks {
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('end')
-                    sinon.assert.calledWithExactly(this.res.send, ...args)
+                    sinon.assert.calledWithExactly(this.initialResponse.send, ...args)
                     return mocks
                 }),
             )
@@ -124,7 +128,7 @@ export class Mocks {
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('sendFile')
-                    sinon.assert.calledWith(this.res.sendFile, ...args)
+                    sinon.assert.calledWith(this.initialResponse.sendFile, ...args)
                     return mocks
                 }),
             )
@@ -132,7 +136,7 @@ export class Mocks {
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('redirect')
-                    sinon.assert.calledWithExactly(this.res.redirect, ...args)
+                    sinon.assert.calledWithExactly(this.initialResponse.redirect, ...args)
                     return mocks
                 }),
             )
@@ -140,21 +144,21 @@ export class Mocks {
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('render')
-                    sinon.assert.calledWith(this.res.render, ...args)
+                    sinon.assert.calledWith(this.initialResponse.render, ...args)
                     return mocks
                 }),
             )
         const expectType = (expectedType: string): TestResult =>
             this.createTestResult(
                 promise.then((mocks) => {
-                    sinon.assert.calledWith(this.res.type, expectedType)
+                    sinon.assert.calledWith(this.initialResponse.type, expectedType)
                     return mocks
                 }),
             )
         const expectStatus = (expectedStatus: number): TestResult =>
             this.createTestResult(
                 promise.then((mocks) => {
-                    sinon.assert.calledWith(this.res.status, expectedStatus)
+                    sinon.assert.calledWith(this.initialResponse.status, expectedStatus)
                     return mocks
                 }),
             )
@@ -162,7 +166,7 @@ export class Mocks {
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('sendStatus')
-                    sinon.assert.calledWith(this.res.sendStatus, expectedStatus)
+                    sinon.assert.calledWith(this.initialResponse.sendStatus, expectedStatus)
                     return mocks
                 }),
             )
@@ -204,11 +208,11 @@ export class Mocks {
             this.createTestResult(
                 promise.then((mocks) => {
                     try {
-                        sinon.assert.calledWithExactly(this.res.set, name, value)
+                        sinon.assert.calledWithExactly(this.initialResponse.set, name, value)
                         return mocks
                     } catch (e) {
                         try {
-                            sinon.assert.calledWithExactly(this.res.setHeader, name, value)
+                            sinon.assert.calledWithExactly(this.initialResponse.setHeader, name, value)
                             return mocks
                         } catch (e2) {
                             e.message += `\n${e2.message}`

@@ -63,6 +63,18 @@ describe('ExpressMocks', () => {
         return mocks.test(asyncServiceRouter).expectJson({ test: false })
     })
 
+    it('should be able to handle replaced response mock functions', () => {
+        return mocks
+            .test((_, res) => {
+                const origJson = res.json
+                res.json = (body?: any) => {
+                    return origJson.call(res, body)
+                }
+                res.json({ test: true })
+            })
+            .expectJson({ test: true })
+    })
+
     it('should allow passing modified requests', () => {
         mocks.req.query.value = 'ok'
         return mocks.test(asyncServiceRouter).expectJson({ test: true })
