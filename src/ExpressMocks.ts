@@ -287,19 +287,42 @@ export default class ExpressMocks {
         return Object.assign(
             ret,
             {
+                // inherited from Node ServerResponse
+                // some props:
+                headersSent: false,
+                finished: false,
+                writableEnded: false,
+                writableFinished: false,
+                // some methods:
+                cork: sinon.stub(),
+                flushHeaders: sinon.stub(),
+                getHeader: sinon.stub(),
+                getHeaderNames: sinon.stub(),
+                getHeaders: sinon.stub(),
+                hasHeader: sinon.stub(),
+                removeHeader: sinon.stub(),
+                setTimeout: sinon.stub().returns(ret),
+                uncork: sinon.stub(),
+                write: sinon.stub(),
+                writeContinue: sinon.stub(),
+                writeHead: sinon.stub().returns(ret),
+                writeProcessing: sinon.stub(),
+
+                // Express Response
+                // props:
+                locals: {},
+                // methods:
                 append: sinon.stub().returns(ret),
-                attachement: sinon.stub().returns(ret),
-                clearCookie: sinon.stub().returns(ret),
+                attachment: sinon.stub().returns(ret),
                 cookie: sinon.stub().returns(ret),
+                clearCookie: sinon.stub().returns(ret),
                 download: sinon.stub().returns(ret),
                 end: sinon.stub().returns(ret),
-                format: {},
+                format: sinon.stub().returns(ret),
                 get: sinon.stub(),
-                headersSent: sinon.stub().returns(ret),
                 json: sinon.stub().returns(ret),
                 jsonp: sinon.stub().returns(ret),
                 links: sinon.stub().returns(ret),
-                locals: {},
                 location: sinon.stub().returns(ret),
                 redirect: sinon.stub().returns(ret),
                 render: sinon.stub().returns(ret),
@@ -312,7 +335,6 @@ export default class ExpressMocks {
                 status: sinon.stub().returns(ret),
                 type: sinon.stub().returns(ret),
                 vary: sinon.stub().returns(ret),
-                writeHead: sinon.stub().returns(ret),
             },
             options,
         )
