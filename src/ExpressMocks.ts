@@ -4,7 +4,7 @@ import * as assert from 'assert'
 import { SinonStub } from 'sinon'
 export type ErrorCheck = (err: any) => void
 
-type FinalizingMethod = 'send' | 'json' | 'jsonp' | 'end' | 'sendStatus' | 'sendFile' | 'render' | 'redirect' | 'next'
+type FinalizingMethod = 'send' | 'json' | 'jsonp' | 'end' | 'sendStatus' | 'sendFile' | 'download' | 'render' | 'redirect' | 'next'
 
 function isSinonStub(stub: any): stub is SinonStub {
     return stub?.hasOwnProperty?.('callCount')
@@ -53,6 +53,7 @@ export class Mocks {
             this.res.jsonp.callsFake(resolveOnCallback)
             this.res.send.callsFake(resolveOnCallback)
             this.res.sendFile.callsFake(resolveOnCallback)
+            this.res.download.callsFake(resolveOnCallback)
             this.res.end.callsFake(resolveOnCallback)
             this.res.render.callsFake(resolveOnCallback)
             this.next.callsFake(resolveOnCallback)
@@ -86,6 +87,7 @@ export class Mocks {
             checkForResponse(expectedCall, 'send', this.initialResponse.send)
             checkForResponse(expectedCall, 'sendStatus', this.initialResponse.sendStatus)
             checkForResponse(expectedCall, 'sendFile', this.initialResponse.sendFile)
+            checkForResponse(expectedCall, 'download', this.initialResponse.download)
             checkForResponse(expectedCall, 'render', this.initialResponse.render)
             checkForResponse(expectedCall, 'end', this.initialResponse.end)
             checkForResponse(expectedCall, 'json', this.initialResponse.json)
@@ -129,6 +131,14 @@ export class Mocks {
                 promise.then((mocks) => {
                     checkForOtherResponses('sendFile')
                     sinon.assert.calledWith(this.initialResponse.sendFile, ...args)
+                    return mocks
+                }),
+            )
+        const expectDownload = (...args: any[]): TestResult =>
+            this.createTestResult(
+                promise.then((mocks) => {
+                    checkForOtherResponses('download')
+                    sinon.assert.calledWith(this.initialResponse.download, ...args)
                     return mocks
                 }),
             )
@@ -229,6 +239,7 @@ export class Mocks {
             expectSend,
             expectEnd,
             expectSendFile,
+            expectDownload,
             expectRedirect,
             expectRender,
             expectType,
@@ -249,6 +260,7 @@ export interface TestResult extends Promise<Mocks> {
     expectRedirect(...args: any[]): TestResult
     expectSendStatus(expectedStatus: number): TestResult
     expectSendFile(...args: any[]): TestResult
+    expectDownload(...args: any[]): TestResult
     expectType(expectedType: string): TestResult
     expectStatus(expectedStatus: number): TestResult
     expectNext(expected?: any, message?: string | RegExp | ErrorCheck): TestResult

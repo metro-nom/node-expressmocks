@@ -109,6 +109,14 @@ describe('ExpressMocks', () => {
             .expectSendFile('/path/to/file')
     })
 
+    it('should resolve after download', () => {
+        return mocks
+            .test((_, res) => {
+                res.download('/path/to/file', 'file.name')
+            })
+            .expectDownload('/path/to/file', 'file.name')
+    })
+
     it('should resolve after render', () => {
         return mocks
             .test((_, res) => {
