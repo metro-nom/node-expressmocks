@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express'
 
-export const helloWorld: RequestHandler = (req, res, next) => {
+export const helloWorld: RequestHandler<any, any, any, { name: string }> = (req, res, next) => {
     const { name } = req.params
 
     if (name === 'Carsten') {
