@@ -23,11 +23,11 @@ export class Mocks {
         this.initialResponse = { ...res }
     }
 
-    public test(router: RequestHandler): TestResult {
+    public test(router: RequestHandler<any, any, any, any>): TestResult {
         return this.execute(router)
     }
 
-    public testError(router: ErrorRequestHandler, err: unknown): TestResult {
+    public testError(router: ErrorRequestHandler<any, any, any, any>, err: unknown): TestResult {
         return this.execute((req, res, next) => {
             return router(err, req, res, next)
         })
