@@ -24,7 +24,7 @@ Let's say you have the following `SampleEndpoints` implementation:
 ```typescript
 import { RequestHandler } from 'express'
 
-const helloWorld: RequestHandler = (req, res, next) => {
+const helloWorld: RequestHandler<any, any, any, { name: string } = (req, res, next) => {
     const { name } = req.params
 
     if (name === 'Carsten') {
