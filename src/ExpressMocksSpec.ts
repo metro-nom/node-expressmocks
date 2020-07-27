@@ -9,7 +9,9 @@ import data_driven = require('data-driven')
 const serviceMethod = (value: string) => new Promise((resolve) => setTimeout(() => resolve({ test: value === 'ok' }), 1))
 
 const asyncServiceRouter = (req: Request, res: Response, next: NextFunction): void => {
-    serviceMethod(req.query.value).then(res.json).catch(next)
+    serviceMethod(req.query.value as string)
+        .then(res.json)
+        .catch(next)
 }
 
 class SomeError extends VError {}
