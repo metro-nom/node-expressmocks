@@ -46,7 +46,7 @@
         "@types/chai-as-promised": "^7.1.0",
         "@types/data-driven": "0.0.30",
         "@types/express": "^4.17.7",
-        "@types/mocha": "^5.2.5",
+        "@types/mocha": "^8.0.2",
         "@types/node": "^10.17.25",
         "@types/sinon": "^5.0.1",
         "@types/verror": "^1.10.3",
