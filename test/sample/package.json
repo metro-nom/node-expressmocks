@@ -4,7 +4,7 @@
     "description": "Some example project using ExpressMocks",
     "main": "index.js",
     "scripts": {
-        "test": "_mocha --require ts-node/register 'src/**/*Spec.ts'"
+        "test": "_mocha 'src/**/*Spec.ts'"
     },
     "author": "Carsten Rohrbach",
     "license": "MIT",
