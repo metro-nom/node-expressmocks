@@ -179,7 +179,7 @@ describe('ExpressMocks', () => {
         let flag = false
         return mocks
             .test((_, res) => {
-                return new Promise((resolve) => {
+                return new Promise<void>((resolve) => {
                     res.sendStatus(HttpStatus.NOT_FOUND)
                     setTimeout(() => {
                         flag = true
