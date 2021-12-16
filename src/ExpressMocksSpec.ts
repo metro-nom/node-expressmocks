@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
-import * as HttpStatus from 'http-status-codes'
+import HttpStatus from 'http-status-codes'
 import { expect } from 'chai'
-import { default as ExpressMocks, Mocks, TestResult } from './ExpressMocks'
-import * as VError from 'verror'
-import * as sinon from 'sinon'
-import data_driven = require('data-driven')
+import { ExpressMocks, Mocks, TestResult } from './ExpressMocks'
+import VError from 'verror'
+import sinon from 'sinon'
+import data_driven from 'data-driven'
 
 const serviceMethod = (value: string) => new Promise((resolve) => setTimeout(() => resolve({ test: value === 'ok' }), 1))
 

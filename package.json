@@ -1,23 +1,29 @@
 {
     "name": "expressmocks",
-    "version": "0.3.1",
+    "version": "1.0.0",
     "description": "A small tool to support unit testing of express request handlers",
-    "main": "./lib/ExpressMocks.js",
-    "types": "./lib/ExpressMocks.d.ts",
+    "main": "lib/cjs/ExpressMocks.js",
+    "module": "lib/esm/ExpressMocks.js",
+    "types": "lib/cjs/ExpressMocks.d.ts",
     "files": [
-        "lib/ExpressMocks.*"
+        "lib/*/ExpressMocks.*"
     ],
     "scripts": {
         "build": "npm run compile && npm run lint && npm run test",
-        "compile": "tsc",
+        "compile": "npm run compile:es6 && npm run compile:cjs",
+        "compile:es6": "tsc -p tsconfig-es6.json",
+        "compile:cjs": "tsc",
         "test": "npm run lint && npm run coverage && npm run test:sample",
         "lint": "eslint 'src/**/*.ts'",
         "lint:fix": "eslint 'src/**/*.ts' --fix",
         "coverage": "npm run coverage:run && npm run coverage:check",
         "coverage:run": "nyc _mocha 'src/**/*Spec.ts'",
         "coverage:check": "nyc check-coverage  --statements 99 --branches 82 --functions 99  --lines 99",
-        "test:unit": "_mocha 'src/**/*Spec.ts'",
-        "test:sample": "cd test/sample && npm install && npm run test"
+        "test:unit": "mocha 'src/**/*Spec.ts'",
+        "test:sample": "npm run test:cjs-sample && npm run test:esm-sample",
+        "test:cjs-sample": "cd test/cjs-sample && npm install && npm run test",
+        "test:esm-sample": "cd test/esm-sample && npm install && npm run test",
+        "prepublish": "npm run build"
     },
     "repository": {
         "type": "git",
@@ -36,7 +42,6 @@
         "url": "https://github.com/metro-nom/node-expressmocks/issues"
     },
     "homepage": "https://github.com/metro-nom/node-expressmocks#readme",
-    "dependencies": {},
     "peerDependencies": {
         "express": "^4.0.0",
         "sinon": ">=6.0.0"
@@ -45,26 +50,27 @@
         "@types/chai": "^4.1.4",
         "@types/chai-as-promised": "^7.1.0",
         "@types/data-driven": "0.0.30",
-        "@types/express": "^4.17.7",
-        "@types/mocha": "^8.0.3",
-        "@types/node": "^14.14.12",
-        "@types/sinon": "^9.0.5",
+        "@types/express": "^4.17.13",
+        "@types/serve-static": "> 1.13.9",
+        "@types/mocha": "^9.0.0",
+        "@types/node": "^16.11.14",
+        "@types/sinon": "^10.0.6",
         "@types/verror": "^1.10.3",
-        "@typescript-eslint/eslint-plugin": "^4.0.0",
-        "@typescript-eslint/parser": "^3.2.0",
+        "@typescript-eslint/eslint-plugin": "^5.7.0",
+        "@typescript-eslint/parser": "^5.7.0",
         "chai": ">=4.0.0",
         "chai-as-promised": "^7.1.1",
         "data-driven": "^1.4.0",
-        "eslint": "^7.2.0",
-        "eslint-config-prettier": "^6.11.0",
-        "eslint-plugin-prettier": "^3.1.3",
+        "eslint": "^8.4.1",
+        "eslint-config-prettier": "^8.3.0",
+        "eslint-plugin-prettier": "^4.0.0",
         "express": "^4.17.1",
         "http-status-codes": "^2.1.3",
-        "mocha": "^8.2.1",
+        "mocha": "^9.1.3",
         "nyc": "^15.1.0",
         "prettier": "^2.0.5",
         "sinon": ">=6.0.0",
-        "ts-node": "^9.0.0",
+        "ts-node": "^10.4.0",
         "typescript": "^4.1.2",
         "verror": "^1.10.0"
     }
