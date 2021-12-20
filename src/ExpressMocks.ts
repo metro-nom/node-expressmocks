@@ -7,6 +7,7 @@ export type ErrorCheck = (err: any) => void
 type FinalizingMethod = 'send' | 'json' | 'jsonp' | 'end' | 'sendStatus' | 'sendFile' | 'download' | 'render' | 'redirect' | 'next'
 
 function isSinonStub(stub: any): stub is SinonStub {
+    // eslint-disable-next-line no-prototype-builtins
     return stub?.hasOwnProperty?.('callCount')
 }
 
@@ -35,7 +36,6 @@ export class Mocks {
 
     private execute(callback: (req: any, res: any, next: any) => any) {
         const promise = new Promise((resolve, reject) => {
-            let returnedPromise: any = undefined
             let didReturnPromise = false
             let asynchronous = false
             let finishedSynchronously = false
@@ -58,7 +58,7 @@ export class Mocks {
             this.res.render.callsFake(resolveOnCallback)
             this.next.callsFake(resolveOnCallback)
 
-            returnedPromise = callback(this.req, this.res, this.next as any)
+            const returnedPromise = callback(this.req, this.res, this.next as any)
             didReturnPromise = !!returnedPromise && returnedPromise.then
             asynchronous = true
 
@@ -268,7 +268,7 @@ export interface TestResult extends Promise<Mocks> {
 }
 
 // parts of code from https://github.com/danawoodman/sinon-express-mock/blob/master/src/index.js
-export default class ExpressMocks {
+export class ExpressMocks {
     public static mockRequest = (options = {}): any => {
         const ret = {}
         return Object.assign(

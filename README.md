@@ -39,7 +39,7 @@ const helloWorld: RequestHandler = (req, res, next) => {
 
 Some simple tests look like this:
 ```typescript
-import ExpressMocks from 'expressmocks'
+import { ExpressMocks } from 'expressmocks'
 import { helloWorld } from './SampleEndpoints'
 
 describe('helloWorld', () => {
@@ -83,7 +83,7 @@ You may also add your own custom stubs if you are using some more esoteric funct
     })
 ```
 
-For more examples, please see the [sample project](./test/sample) and the [ExpressMocksSpec](./src/ExpressMocksSpec.ts)
+For more examples, please see the [sample project](./test/cjs-sample) and the [ExpressMocksSpec](./src/ExpressMocksSpec.ts)
 
 ## Build yourself
 

@@ -1,12 +1,15 @@
 {
     "compilerOptions": {
-        "target": "es5",
-        "module": "commonjs",
+        "module": "CommonJS",
+        "outDir": "lib/cjs",
+        "target": "ES6",
         "declaration": true,
-        "outDir": "./lib",
         "strict": true,
+        "moduleResolution": "Node",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "lib": [
-            "es6"
+            "ES6"
         ]
     },
     "include": [
