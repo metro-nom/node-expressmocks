@@ -21,8 +21,8 @@
         "coverage:check": "nyc check-coverage  --statements 99 --branches 82 --functions 99  --lines 99",
         "test:unit": "mocha 'src/**/*Spec.ts'",
         "test:sample": "npm run test:cjs-sample && npm run test:esm-sample",
-        "test:cjs-sample": "cd test/cjs-sample && npm install && npm run test",
-        "test:esm-sample": "cd test/esm-sample && npm install && npm run test"
+        "test:cjs-sample": "cd test/cjs-sample && npm ci && npm run test",
+        "test:esm-sample": "cd test/esm-sample && npm ci && npm run test"
     },
     "repository": {
         "type": "git",
