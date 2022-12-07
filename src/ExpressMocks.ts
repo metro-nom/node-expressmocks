@@ -2,6 +2,7 @@ import * as sinon from 'sinon'
 import { ErrorRequestHandler, RequestHandler } from 'express'
 import * as assert from 'assert'
 import { SinonStub } from 'sinon'
+import * as core from 'express-serve-static-core'
 export type ErrorCheck = (err: any) => void
 
 type FinalizingMethod = 'send' | 'json' | 'jsonp' | 'end' | 'sendStatus' | 'sendFile' | 'download' | 'render' | 'redirect' | 'next'
@@ -24,11 +25,14 @@ export class Mocks {
         this.initialResponse = { ...res }
     }
 
-    public test(router: RequestHandler<any, any, any, any>): TestResult {
+    public test<P, ResBody, ReqBody, ReqQuery>(router: RequestHandler<P, ResBody, ReqBody, ReqQuery>): TestResult<P, ResBody, ReqBody, ReqQuery> {
         return this.execute(router)
     }
 
-    public testError(router: ErrorRequestHandler<any, any, any, any>, err: unknown): TestResult {
+    public testError<P, ResBody, ReqBody, ReqQuery>(
+        router: ErrorRequestHandler<P, ResBody, ReqBody, ReqQuery>,
+        err: unknown,
+    ): TestResult<P, ResBody, ReqBody, ReqQuery> {
         return this.execute((req, res, next) => {
             return router(err, req, res, next)
         })
@@ -71,7 +75,7 @@ export class Mocks {
         return this.createTestResult(promise.then(() => this))
     }
 
-    private createTestResult<T>(promise: Promise<Mocks>): TestResult {
+    private createTestResult<P, ResBody, ReqBody, ReqQuery>(promise: Promise<Mocks>): TestResult<P, ResBody, ReqBody, ReqQuery> {
         const checkForResponse = (expectedMethodName: FinalizingMethod, actualMethodName: FinalizingMethod, actualStub: sinon.SinonStub) => {
             if (isSinonStub(actualStub)) {
                 if (expectedMethodName === actualMethodName) {
@@ -94,7 +98,7 @@ export class Mocks {
             checkForResponse(expectedCall, 'jsonp', this.initialResponse.jsonp)
             checkForResponse(expectedCall, 'next', this.next)
         }
-        const expectJson = (expectedJson: any): TestResult =>
+        const expectJson = (expectedJson?: ResBody): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('json')
@@ -102,7 +106,7 @@ export class Mocks {
                     return mocks
                 }),
             )
-        const expectJsonp = (expectedJson: any): TestResult =>
+        const expectJsonp = (expectedJson?: ResBody): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('jsonp')
@@ -118,7 +122,7 @@ export class Mocks {
                     return mocks
                 }),
             )
-        const expectEnd = (...args: any[]): TestResult =>
+        const expectEnd = (...args: any[]): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('end')
@@ -126,7 +130,7 @@ export class Mocks {
                     return mocks
                 }),
             )
-        const expectSendFile = (...args: any[]): TestResult =>
+        const expectSendFile = (...args: any[]): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('sendFile')
@@ -134,7 +138,7 @@ export class Mocks {
                     return mocks
                 }),
             )
-        const expectDownload = (...args: any[]): TestResult =>
+        const expectDownload = (...args: any[]): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('download')
@@ -142,7 +146,7 @@ export class Mocks {
                     return mocks
                 }),
             )
-        const expectRedirect = (...args: any[]): TestResult =>
+        const expectRedirect = (...args: any[]): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('redirect')
@@ -150,7 +154,7 @@ export class Mocks {
                     return mocks
                 }),
             )
-        const expectRender = (...args: any[]): TestResult =>
+        const expectRender = (...args: any[]): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('render')
@@ -158,21 +162,21 @@ export class Mocks {
                     return mocks
                 }),
             )
-        const expectType = (expectedType: string): TestResult =>
+        const expectType = (expectedType: string): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     sinon.assert.calledWith(this.initialResponse.type, expectedType)
                     return mocks
                 }),
             )
-        const expectStatus = (expectedStatus: number): TestResult =>
+        const expectStatus = (expectedStatus: number): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     sinon.assert.calledWith(this.initialResponse.status, expectedStatus)
                     return mocks
                 }),
             )
-        const expectSendStatus = (expectedStatus: number): TestResult =>
+        const expectSendStatus = (expectedStatus: number): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('sendStatus')
@@ -203,7 +207,7 @@ export class Mocks {
             }
         }
 
-        const expectNext = (expected?: any, messageOrCheck?: string | RegExp | ErrorCheck): TestResult =>
+        const expectNext = (expected?: any, messageOrCheck?: string | RegExp | ErrorCheck): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     checkForOtherResponses('next')
@@ -217,7 +221,7 @@ export class Mocks {
                     return mocks
                 }),
             )
-        const expectHeader = (name: string, value: string): TestResult =>
+        const expectHeader = (name: string, value: string): TestResult<P, ResBody, ReqBody, ReqQuery> =>
             this.createTestResult(
                 promise.then((mocks) => {
                     try {
@@ -251,20 +255,20 @@ export class Mocks {
     }
 }
 
-export interface TestResult extends Promise<Mocks> {
-    expectJson(expectedJson: any): TestResult
-    expectJsonp(expectedJson: any): TestResult
-    expectSend(...args: any[]): TestResult
-    expectEnd(...args: any[]): TestResult
-    expectRender(...args: any[]): TestResult
-    expectRedirect(...args: any[]): TestResult
-    expectSendStatus(expectedStatus: number): TestResult
-    expectSendFile(...args: any[]): TestResult
-    expectDownload(...args: any[]): TestResult
-    expectType(expectedType: string): TestResult
-    expectStatus(expectedStatus: number): TestResult
-    expectNext(expected?: any, message?: string | RegExp | ErrorCheck): TestResult
-    expectHeader(name: string, value: string): TestResult
+export interface TestResult<P = core.ParamsDictionary, ResBody = any, ReqBody = any, ReqQuery = core.Query> extends Promise<Mocks> {
+    expectJson(expectedJson?: ResBody): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectJsonp(expectedJson?: ResBody): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectSend(expectedResponseBody?: ResBody): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectEnd(...args: any[]): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectRender(...args: any[]): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectRedirect(...args: any[]): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectSendStatus(expectedStatus: number): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectSendFile(...args: any[]): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectDownload(...args: any[]): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectType(expectedType: string): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectStatus(expectedStatus: number): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectNext(expected?: any, message?: string | RegExp | ErrorCheck): TestResult<P, ResBody, ReqBody, ReqQuery>
+    expectHeader(name: string, value: string): TestResult<P, ResBody, ReqBody, ReqQuery>
 }
 
 // parts of code from https://github.com/danawoodman/sinon-express-mock/blob/master/src/index.js

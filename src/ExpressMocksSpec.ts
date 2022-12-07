@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response, NextFunction, RequestHandler } from 'express'
 import HttpStatus from 'http-status-codes'
 import { expect } from 'chai'
 import { ExpressMocks, Mocks, TestResult } from './ExpressMocks'
@@ -14,7 +14,12 @@ const asyncServiceRouter = (req: Request, res: Response, next: NextFunction): vo
         .catch(next)
 }
 
+const typedRequestHandler: RequestHandler<{ myparam: string }, { result: boolean }, { request: string }, { myQuery: string }> = (_req, res) => {
+    res.json({ result: true })
+}
+
 class SomeError extends VError {}
+
 class OtherError extends VError {}
 
 describe('ExpressMocks', () => {
@@ -156,7 +161,8 @@ describe('ExpressMocks', () => {
             .test((_, res) => {
                 res.redirect('/wrong/url')
             })
-            .expectRedirect('/other/url').should.be.rejected
+            .expectRedirect('/other/url')
+            .should.be.rejectedWith('expected redirect to be called with exact arguments')
     })
 
     it('should allow testing of sync handlers with same api (making them async)', () => {
@@ -327,7 +333,7 @@ describe('ExpressMocks', () => {
                 .expectNext(error)
         })
 
-        it('should allow checking for wrong message regexp for next ', () => {
+        it('should allow checking for wrong message regexp for next', () => {
             return mocks
                 .test((_1, _2, next) => {
                     next(new SomeError('Bla'))
@@ -434,6 +440,15 @@ describe('ExpressMocks', () => {
                 }, 10)
             })
             .expectSend('done')
+    })
+
+    it('should handle custom typed request handlers correctly', async () => {
+        await mocks
+            .test(typedRequestHandler)
+            // @ts-expect-error as it checks for a valid response type here
+            .expectJson({ unexpected: 'type' })
+            // should fail here at runtime, but `tsc` should have complained earlier
+            .should.be.rejectedWith('expected json to be called with arguments')
     })
 
     describe('header checks', () => {
