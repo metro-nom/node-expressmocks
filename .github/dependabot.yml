@@ -10,6 +10,10 @@ updates:
     allow:
       - dependency-type: "development"
   - package-ecosystem: "npm"
-    directory: "/test/sample/"
+    directory: "/test/cjs-sample/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/test/esm-sample/"
     schedule:
       interval: "daily"
