@@ -432,6 +432,14 @@ describe('ExpressMocks', () => {
         sinon.assert.calledWith(mocks.res.status, HttpStatus.NOT_FOUND)
     })
 
+    it('should "accept" handler with rejection that didn\'t call next (new in express 5)', async () => {
+        await mocks
+            .test((_, res) => {
+                return Promise.reject('fail')
+            })
+            .should.be.rejectedWith('fail')
+    })
+
     it('should finish asynchronously, even without RequestHandler that returns a promise', () => {
         return mocks
             .test((_, res) => {
