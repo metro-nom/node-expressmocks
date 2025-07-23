@@ -70,7 +70,7 @@
         "http-status-codes": "^2.2.0",
         "mocha": "^10.1.0",
         "nyc": "^17.1.0",
-        "prettier": "^2.8.0",
+        "prettier": "^3.6.2",
         "sinon": "^10.0.0",
         "ts-node": "^10.9.1",
         "typescript": "^5.1.3",
